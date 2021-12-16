@@ -6,10 +6,10 @@ import Albums from './Albums';
 import Tweets from './Tweets';
 import { FaInternetExplorer, FaUserAlt, FaUserSecret } from 'react-icons/fa';
 import { HiSpeakerphone } from 'react-icons/hi';
-// import data from './sampleData.json';
+import data from './sampleData.json';
 
 export default function Artists({baseUrl}) {
-    // const [artists, setArtists] = useState([...data]);
+    const [status, setStatus] = useState(false);
     const [artists, setArtists] = useState([]);
     const [albums, setAlbums] = useState([]);
     const [tweets, setTweets] = useState([]);
@@ -27,7 +27,6 @@ export default function Artists({baseUrl}) {
     }
 
     const apiCallHook = async(method, url, data) => {
-        console.log(url)
         const res = await axios({
             method,
             url,
@@ -38,10 +37,9 @@ export default function Artists({baseUrl}) {
             })
             .catch(error => {
                 if(error.isAxiosError) {
-                    console.log(error.isAxiosError, error);
+                    console.log(error.message);
                 }
             });
-            console.log(res);
             setSync(!sync);
     }
 
@@ -53,12 +51,10 @@ export default function Artists({baseUrl}) {
                 'Content-Type': 'application/json',
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => console.log(err.message));
 
-        console.log(res);
         if(res?.data) {
             setAlbums(res.data)
-            console.log('albums data fetched');
         }
     }
 
@@ -70,12 +66,10 @@ export default function Artists({baseUrl}) {
                 'Content-Type': 'application/json',
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => console.log(err.message));
 
-        console.log(res);
         if(res?.data) {
-            setTweets(res.data)
-            console.log('tweets data fetched');
+            setTweets(res.data);
         }
     }
 
@@ -87,12 +81,14 @@ export default function Artists({baseUrl}) {
                 'Content-Type': 'application/json',
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => console.log(err.message));
 
-        console.log(res);
         if(res?.data) {
-            setArtists(res.data)
-            console.log('artists data fetched');
+            setStatus(false);
+            setArtists(res.data);
+        } else {
+            setArtists(data);
+            setStatus(true);
         }
     }
 
@@ -111,6 +107,7 @@ export default function Artists({baseUrl}) {
 
     return (
         <div className=''>
+            {status && <div style={{backgroundColor: 'white', fontWeight: 'bold'}} className='text-red-500 text-bold py-2 mx-1 rounded'>Please check your network !</div>}
             {!single &&
             <>{artists.map((artist, idx) => {
                 const artistAlbums = albums.filter(album => album.userId === artist.id)

@@ -15,10 +15,8 @@ export default function AlbumData({albumId, baseUrl}) {
         })
         .catch(err => console.log(err));
 
-        console.log(res);
         if(res?.data) {
             setAlbumsData(res.data)
-            console.log('albums photos data fetched');
         }
     }
 

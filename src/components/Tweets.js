@@ -5,19 +5,21 @@ import { FaUserAlt, FaEdit } from 'react-icons/fa';
 import { AiFillDelete } from 'react-icons/ai';
 
 export default function Tweets({tweets, baseUrl, sync, setSync, apiCallHook}) {
+    const [status, setStatus] = useState(false);
     const [tweet, setTweet] = useState('');
     const [error, setError] = useState('');
     const [formActive, setFormActive] = useState(false);
 
     const handleChange = (e) => {
-        console.log(e.target.value);
         setTweet(e.target.value);
         setError('');
+        setStatus(false);
     }
 
     const handleFormActive = () => {
         setFormActive(!formActive);
         setError('');
+        setStatus(false);
     }
 
     const sendTweet = async() => {
@@ -34,13 +36,14 @@ export default function Tweets({tweets, baseUrl, sync, setSync, apiCallHook}) {
                 'Content-Type': 'application/json',
             }
         })
-        .catch(err => console.log(err));
+        .catch(err => console.log(err.message));
 
-        console.log(res);
         if(res?.data) {
-            console.log('Tweet sent');
+            setStatus(false);
             setFormActive(false);
             setTweet('');
+        } else {
+            setStatus(true);
         }
     }
 
@@ -71,6 +74,8 @@ export default function Tweets({tweets, baseUrl, sync, setSync, apiCallHook}) {
                     Send Tweet 
                 </span>
             </p>}
+            {status && <div style={{backgroundColor: 'white', fontWeight: 'bold'}} className='text-red-500 text-bold p-2 rounded'>Please check your network !</div>}
+
                     <p className='my-2 py-2 pl-6 bg-blue-400 text-white font-bold'>Tweets 
                     {!formActive && <span className='bg-purple-600 p-3 ml-6 -mr-8 rounded cursor-pointer hover:bg-green-400 hover:text-black' onClick={handleFormActive}>Send Tweet</span>}
                     </p>
@@ -85,8 +90,7 @@ const Tweet = ({tweet: {id, name, body, email}, baseUrl, apiCallHook}) => {
     const [editForm, setEditForm] = useState(false);
     const [tweetText, setTweetText] = useState(body);
     
-    const handleChange = (e) => {
-        console.log(e.target.value);
+    const handleTweetChange = (e) => {
         setTweetText(e.target.value);
     }
 
@@ -96,13 +100,12 @@ const Tweet = ({tweet: {id, name, body, email}, baseUrl, apiCallHook}) => {
    
     const updateTweet = () => {
         apiCallHook('PUT', `${baseUrl}/comments/${id}`, {body: tweetText});
-        setInterval(() => {
+        setTimeout(() => {
             setEditForm(false);
         }, 300);
     }
 
     const deleteTweet = () => {
-        console.log('delete twit with id: ', id);
         apiCallHook('DELETE', `${baseUrl}/comments/${id}`);
     }
     return(
@@ -115,13 +118,13 @@ const Tweet = ({tweet: {id, name, body, email}, baseUrl, apiCallHook}) => {
             {!editForm && <span>{body}</span>}
             {editForm && <span>
                 <textarea 
-                    className={'error' ? 'text-red-800 border-red-700 border-3 p-2 mb-2 rounded' : 'border-blue-200 border-2 p-2 mb-2 rounded'}
+                    className='border-red-700 border-3 p-2 mb-2 rounded'
                     style={{width: '100%'}}
                     cols={3}
                     rows={4}
                     maxLength={160}
-                    value={body}
-                    onChange={handleChange}
+                    value={tweetText}
+                    onChange={handleTweetChange}
                     required={true}
                 /><br />
                  <span 
@@ -130,7 +133,7 @@ const Tweet = ({tweet: {id, name, body, email}, baseUrl, apiCallHook}) => {
                     Cancel 
                 </span>
                 <span 
-                    className={'tweet' ? 'cursor-pointer bg-green-600 p-2 mb-2 text-white rounded hover:bg-green-400 hover:text-black' : 'bg-gray-600 p-2 mb-2 text-white rounded'} onClick={() => updateTweet()}
+                    className='cursor-pointer bg-green-600 p-2 mb-2 text-white rounded hover:bg-green-400 hover:text-black' onClick={() => updateTweet()}
                 > 
                     Update Tweet 
                 </span>
